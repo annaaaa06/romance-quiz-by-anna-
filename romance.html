@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Romance & Romantasy Quiz</title>
+
+<style>
+body {
+    font-family: Arial;
+    background: #0f0f1a;
+    color: white;
+    text-align: center;
+}
+
+.box {
+    width: 500px;
+    margin: 30px auto;
+    background: #1c1c2b;
+    padding: 20px;
+    border-radius: 15px;
+}
+
+button {
+    margin: 5px;
+    padding: 10px;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    background: #333;
+    color: white;
+}
+
+button:hover {
+    background: #555;
+}
+
+.badge {
+    display: inline-block;
+    margin: 5px;
+    padding: 5px 10px;
+    background: gold;
+    color: black;
+    border-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<audio id="music" loop autoplay>
+<source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2b6c7c3c1b.mp3" type="audio/mp3">
+</audio>
+
+<div class="box">
+
+<h2>💖 Romance & Romantasy Quiz</h2>
+
+<p id="rank"></p>
+<p id="level"></p>
+
+<hr>
+
+<p id="question"></p>
+<div id="answers"></div>
+
+<p id="result"></p>
+
+<hr>
+
+<h3>🎖 Badges</h3>
+<div id="badges"></div>
+
+</div>
+
+<script>
+let level = parseInt(localStorage.getItem("level")) || 1;
+let xp = parseInt(localStorage.getItem("xp")) || 0;
+let badges = JSON.parse(localStorage.getItem("badges")) || [];
+
+let questions = [
+{
+q: "Dans quel livre trouve-t-on une romance ennemies to lovers avec dragons ?",
+a: ["Fourth Wing", "Twilight", "Hunger Games", "Divergente"],
+r: "Fourth Wing"
+},
+{
+q: "Quel type de romance est souvent dans ACOTAR ?",
+a: ["Fantasy romantique", "Science fiction", "Thriller", "Horreur"],
+r: "Fantasy romantique"
+},
+{
+q: "Twilight parle principalement de quoi ?",
+a: ["Vampire et amour", "Dragons", "Pirates", "Magie scolaire"],
+r: "Vampire et amour"
+},
+{
+q: "Quel trope est très populaire en romantasy ?",
+a: ["Ennemies to lovers", "Slice of life", "Historique pur", "Sport"],
+r: "Ennemies to lovers"
+}
+];
+
+let current;
+
+function updateUI() {
+    document.getElementById("level").innerText = "⭐ Niveau : " + level;
+    
+    let rank = "Bronze";
+    if(level > 10) rank = "Argent";
+    if(level > 20) rank = "Or";
+    if(level > 35) rank = "Diamant";
+
+    document.getElementById("rank").innerText = "🏆 Rang : " + rank;
+
+    document.getElementById("badges").innerHTML = badges
+        .map(b => `<span class='badge'>${b}</span>`)
+        .join("");
+}
+
+function newQuestion() {
+    current = questions[Math.floor(Math.random() * questions.length)];
+
+    document.getElementById("question").innerText = current.q;
+
+    let div = document.getElementById("answers");
+    div.innerHTML = "";
+
+    current.a.sort(() => Math.random() - 0.5);
+
+    current.a.forEach(choice => {
+        let btn = document.createElement("button");
+        btn.innerText = choice;
+        btn.onclick = () => check(choice);
+        div.appendChild(btn);
+    });
+}
+
+function check(ans) {
+    if(ans === current.r) {
+        document.getElementById("result").innerText = "✅ Bonne réponse !";
+        xp += 10;
+
+        if(xp >= 30) {
+            level++;
+            xp = 0;
+            unlockBadge();
+        }
+
+    } else {
+        document.getElementById("result").innerText = "❌ Faux ! Réponse : " + current.r;
+    }
+
+    localStorage.setItem("level", level);
+    localStorage.setItem("xp", xp);
+
+    updateUI();
+
+    setTimeout(newQuestion, 1500);
+}
+
+function unlockBadge() {
+    let list = ["Lecteur débutant", "Romance lover", "Book addict", "Romantasy queen"];
+    let b = list[Math.floor(Math.random() * list.length)];
+
+    if(!badges.includes(b)) {
+        badges.push(b);
+        localStorage.setItem("badges", JSON.stringify(badges));
+    }
+}
+
+updateUI();
+newQuestion();
+</script>
+
+</body>
+</html>
