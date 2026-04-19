@@ -6,29 +6,34 @@
 
 <style>
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
     background: #0f0f1a;
     color: white;
     text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
 .box {
-    width: 500px;
+    width: 90%;
+    max-width: 500px;
     margin: 30px auto;
     background: #1c1c2b;
     padding: 20px;
     border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 button {
-    margin: 5px;
-    padding: 10px;
+    margin: 5px 0;
+    padding: 12px;
     width: 100%;
     border-radius: 8px;
     border: none;
     cursor: pointer;
     background: #333;
     color: white;
+    font-size: 14px;
 }
 
 button:hover {
@@ -42,13 +47,20 @@ button:hover {
     background: gold;
     color: black;
     border-radius: 8px;
+    font-size: 12px;
+}
+
+#musicBtn {
+    margin-top: 10px;
+    background: #444;
 }
 </style>
 </head>
 
 <body>
 
-<audio id="music" loop autoplay>
+<!-- 🎵 musique -->
+<audio id="music" loop>
 <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_2b6c7c3c1b.mp3" type="audio/mp3">
 </audio>
 
@@ -58,6 +70,8 @@ button:hover {
 
 <p id="rank"></p>
 <p id="level"></p>
+
+<button id="musicBtn">🎵 Activer la musique</button>
 
 <hr>
 
@@ -77,6 +91,14 @@ button:hover {
 let level = parseInt(localStorage.getItem("level")) || 1;
 let xp = parseInt(localStorage.getItem("xp")) || 0;
 let badges = JSON.parse(localStorage.getItem("badges")) || [];
+
+let music = document.getElementById("music");
+let musicBtn = document.getElementById("musicBtn");
+
+musicBtn.onclick = () => {
+    music.play();
+    musicBtn.innerText = "🎵 Musique activée";
+};
 
 let questions = [
 {
@@ -105,7 +127,7 @@ let current;
 
 function updateUI() {
     document.getElementById("level").innerText = "⭐ Niveau : " + level;
-    
+
     let rank = "Bronze";
     if(level > 10) rank = "Argent";
     if(level > 20) rank = "Or";
@@ -126,9 +148,9 @@ function newQuestion() {
     let div = document.getElementById("answers");
     div.innerHTML = "";
 
-    current.a.sort(() => Math.random() - 0.5);
+    let shuffled = [...current.a].sort(() => Math.random() - 0.5);
 
-    current.a.forEach(choice => {
+    shuffled.forEach(choice => {
         let btn = document.createElement("button");
         btn.innerText = choice;
         btn.onclick = () => check(choice);
@@ -153,10 +175,10 @@ function check(ans) {
 
     localStorage.setItem("level", level);
     localStorage.setItem("xp", xp);
+    localStorage.setItem("badges", JSON.stringify(badges));
 
     updateUI();
-
-    setTimeout(newQuestion, 1500);
+    setTimeout(newQuestion, 1200);
 }
 
 function unlockBadge() {
@@ -165,7 +187,6 @@ function unlockBadge() {
 
     if(!badges.includes(b)) {
         badges.push(b);
-        localStorage.setItem("badges", JSON.stringify(badges));
     }
 }
 
