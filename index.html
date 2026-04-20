@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Quiz Romance & Romantasy</title>
+
   <style>
     body {
       font-family: Arial;
@@ -10,11 +11,17 @@
       color: white;
       text-align: center;
     }
+
     .container {
       max-width: 700px;
       margin: auto;
       padding: 20px;
     }
+
+    h1 {
+      color: #ff77aa;
+    }
+
     button {
       padding: 12px;
       margin: 8px;
@@ -24,13 +31,17 @@
       background: #2a2a40;
       color: white;
     }
+
     button:hover {
       background: #ff77aa;
     }
+
     select {
       padding: 10px;
       border-radius: 10px;
+      margin-bottom: 10px;
     }
+
     .answer {
       display: block;
       width: 100%;
@@ -44,16 +55,19 @@
 
   <h1>📚 Quiz Romance & Romantasy</h1>
 
+  <!-- MENU LIVRES -->
   <select id="bookSelect">
-    <option value="romance">Romance</option>
-    <option value="romantasy">Romantasy</option>
+    <option value="romance">Romance générale</option>
+    <option value="romantasy">Romantasy générale</option>
     <option value="acotar">ACOTAR</option>
     <option value="twisted">Twisted Love</option>
   </select>
 
+  <br>
+
   <button onclick="generateQuiz()">🤖 Générer quiz IA</button>
 
-  <p id="question">Clique pour commencer</p>
+  <p id="question">Choisis un livre et lance le quiz</p>
   <div id="answers"></div>
 
   <p id="score"></p>
@@ -66,26 +80,43 @@ let quizzes = [];
 let current = 0;
 let score = 0;
 
+//
+// 🤖 GENERATION IA
+//
 async function generateQuiz() {
   const theme = document.getElementById("bookSelect").value;
 
-  const res = await fetch("/api/generate-quiz", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ theme })
-  });
+  try {
+    const res = await fetch("/api/generate-quiz", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ theme })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  quizzes = data.quiz;
-  current = 0;
-  score = 0;
+    if (!data.quiz || data.quiz.length === 0) {
+      alert("Erreur : quiz vide ou IA non disponible");
+      return;
+    }
 
-  loadQuestion();
+    quizzes = data.quiz;
+    current = 0;
+    score = 0;
+
+    loadQuestion();
+
+  } catch (error) {
+    console.error(error);
+    alert("Erreur serveur IA ❌");
+  }
 }
 
+//
+// 📖 AFFICHER QUESTION
+//
 function loadQuestion() {
   const q = quizzes[current];
 
@@ -103,6 +134,9 @@ function loadQuestion() {
   });
 }
 
+//
+// ✅ CHECK REPONSE
+//
 function checkAnswer(i) {
   if (i === quizzes[current].correct) {
     score++;
@@ -113,7 +147,7 @@ function checkAnswer(i) {
   if (current < quizzes.length) {
     loadQuestion();
   } else {
-    document.getElementById("question").innerText = "Quiz terminé !";
+    document.getElementById("question").innerText = "🎉 Quiz terminé !";
     document.getElementById("answers").innerHTML = "";
   }
 
