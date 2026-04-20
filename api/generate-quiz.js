@@ -1,40 +1,30 @@
-export default async function handler(req, res) {
-  const { theme } = req.body;
+async function generateQuiz() {
+  const theme = document.getElementById("bookSelect").value;
 
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `
-Tu es une IA qui crée des quiz romance / romantasy.
+  try {
+    const res = await fetch("/api/generate-quiz", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ theme })
+    });
 
-Crée 5 questions au format JSON STRICT :
+    const data = await res.json();
 
-[
-  {
-    "question": "...",
-    "answers": ["A","B","C","D"],
-    "correct": 0,
-    "type": "qcm | vrai-faux | citation"
+    if (!data.quiz) {
+      alert("Erreur IA : aucun quiz reçu");
+      return;
+    }
+
+    quizzes = data.quiz;
+    current = 0;
+    score = 0;
+
+    loadQuestion();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erreur serveur IA");
   }
-]
-
-Thème : ${theme}
-`
-        }
-      ]
-    })
-  });
-
-  const data = await response.json();
-  const text = data.choices[0].message.content;
-
-  res.status(200).json({ quiz: JSON.parse(text) });
 }
