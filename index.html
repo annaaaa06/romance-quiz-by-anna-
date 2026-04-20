@@ -1,7 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Romance & Romantasy</title>
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f0f1a;
+      color: white;
+      text-align: center;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      padding: 20px;
+    }
+    button {
+      padding: 12px;
+      margin: 8px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #2a2a40;
+      color: white;
+    }
+    button:hover {
+      background: #ff77aa;
+    }
+    select {
+      padding: 10px;
+      border-radius: 10px;
+    }
+    .answer {
+      display: block;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <h1>📚 Quiz Romance & Romantasy</h1>
+
+  <select id="bookSelect">
+    <option value="romance">Romance</option>
+    <option value="romantasy">Romantasy</option>
+    <option value="acotar">ACOTAR</option>
+    <option value="twisted">Twisted Love</option>
+  </select>
+
+  <button onclick="generateQuiz()">🤖 Générer quiz IA</button>
+
+  <p id="question">Clique pour commencer</p>
+  <div id="answers"></div>
+
+  <p id="score"></p>
+
+</div>
+
+<script>
+
+let quizzes = [];
+let current = 0;
+let score = 0;
+
 async function generateQuiz() {
   const theme = document.getElementById("bookSelect").value;
 
-  const res = await fetch("https://TON-PROJET.vercel.app/api/generate-quiz", {
+  const res = await fetch("/api/generate-quiz", {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -17,3 +85,42 @@ async function generateQuiz() {
 
   loadQuestion();
 }
+
+function loadQuestion() {
+  const q = quizzes[current];
+
+  document.getElementById("question").innerText = q.question;
+
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  q.answers.forEach((a, i) => {
+    const btn = document.createElement("button");
+    btn.innerText = a;
+    btn.className = "answer";
+    btn.onclick = () => checkAnswer(i);
+    answersDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(i) {
+  if (i === quizzes[current].correct) {
+    score++;
+  }
+
+  current++;
+
+  if (current < quizzes.length) {
+    loadQuestion();
+  } else {
+    document.getElementById("question").innerText = "Quiz terminé !";
+    document.getElementById("answers").innerHTML = "";
+  }
+
+  document.getElementById("score").innerText = "Score: " + score;
+}
+
+</script>
+
+</body>
+</html>
